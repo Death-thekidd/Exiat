@@ -62,9 +62,7 @@ app.use(
 		secret: SESSION_SECRET,
 		store: new MongoStore({
 			mongoUrl,
-			mongoOptions: {
-				useNewUrlParser: true,
-			} as MongoClientOptions,
+			mongoOptions: {} as MongoClientOptions,
 		}),
 	})
 );
