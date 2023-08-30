@@ -86,16 +86,11 @@ const logger = winston.createLogger({
 	],
 });
 
-app.use((err: any, req: Request, res: Response) => {
-	logger.error(err.message);
-	res.status(err.status || 500).json({ error: "Something went wrong" });
-});
-
 // mongoose
 // 	.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 // 	.then(() => {
 // 		console.log("Connected to MongoDB");
-// 		userAdd();
+// 		userAdd() ;
 // 		console.log(mongoUrl);
 // 	})
 // 	.catch((error) => {
@@ -144,5 +139,10 @@ app.post(
 	passportConfig.isAuthenticated,
 	userController.postDeleteAccount
 );
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+	logger.error(err.message);
+	res.status(err.status || 500).json({ error: "Something went wrong" });
+});
 
 export default app;
