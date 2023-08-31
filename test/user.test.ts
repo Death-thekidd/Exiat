@@ -9,7 +9,7 @@ describe("POST /signup", () => {
 			name: "Divine Attah",
 			username: "Deaththekidd404",
 			userType: "Student",
-			email: "ohiemidivine8@gmail.com", // An email that already exists on the database
+			email: "ohiemidivine8@gmail.com",
 			password: "typescriptsolos",
 			confirmPassword: "typescriptsolos",
 		};
