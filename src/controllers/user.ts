@@ -2,13 +2,20 @@ import async from "async";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import passport from "passport";
-import { User, UserDocument, AuthToken } from "../models/User";
+import {
+	User,
+	UserDocument,
+	AuthToken,
+	UserInstance,
+} from "../models/user.model";
 import { Request, Response, NextFunction } from "express";
 import { IVerifyOptions } from "passport-local";
 import { WriteError } from "mongodb";
 import { body, check, validationResult } from "express-validator";
 import "../config/passport";
 import { CallbackError, NativeError } from "mongoose";
+import { Op } from "sequelize";
+import sequelize from "../sequelize";
 
 /**
  * Sign in using email and password.
@@ -92,33 +99,29 @@ export const postSignup = async (
 		return res.status(400).json({ errors: errors.array() });
 	}
 
-	const user = new User({
-		email: req.body.email,
-		password: req.body.password,
-	});
+	const existingUser = await User.findOne({ where: { email: req.body.email } });
 
-	User.findOne(
-		{ email: req.body.email },
-		(err: NativeError, existingUser: UserDocument) => {
-			if (err) {
-				return next(err);
-			}
-			if (existingUser) {
-				// Return account already exists error as JSON
-				return res
-					.status(409)
-					.json({ error: "Account with that email address already exists." });
-			}
-			user.save((err) => {
-				if (err) {
-					return next(err);
-				}
-				return res
-					.status(201)
-					.json({ message: "User registered successfully." });
-			});
-		}
-	);
+	if (existingUser) {
+		console.error("User with this email already exists");
+		return res
+			.status(409)
+			.json({ error: "Account with that email address already exists." });
+	}
+
+	try {
+		await User.create({
+			username: req.body.username,
+			name: req.body.name,
+			userType: req.body.userType,
+			password: req.body.password,
+			email: req.body.email,
+		});
+	} catch (error) {
+		console.error("Unable to create table : ", error);
+		return res.status(500).json({ error: "Something went wrong" });
+	}
+
+	return res.status(201).json({ message: "User registered successfully." });
 };
 
 /**
@@ -142,28 +145,34 @@ export const postUpdateProfile = async (
 		return res.status(400).json({ errors: errors.array() });
 	}
 
-	const user = req.user as UserDocument;
-	User.findById(user.id, (err: NativeError, user: UserDocument) => {
-		if (err) {
-			return next(err);
+	try {
+		const userId = (req.user as UserDocument).id; // Assuming you have a user object in the request with an 'id' property
+		const updatedFields: any = {};
+
+		if (req.body.email) {
+			updatedFields.email = req.body.email;
 		}
-		user.email = req.body.email || "";
-		user.save((err: WriteError & CallbackError) => {
-			if (err) {
-				if (err.code === 11000) {
-					// Return email already associated with an account error as JSON
-					return res.status(409).json({
-						error: "The email address is already associated with an account.",
-					});
-				}
-				return next(err);
-			}
-			// Return success message as JSON
-			return res
-				.status(200)
-				.json({ message: "Profile information has been updated." });
+
+		const [updatedRowsCount] = await User.update(updatedFields, {
+			where: { id: userId },
 		});
-	});
+
+		if (updatedRowsCount === 0) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		return res
+			.status(200)
+			.json({ message: "Profile information has been updated." });
+	} catch (error) {
+		if (error.name === "SequelizeUniqueConstraintError") {
+			// Handle the case where the email is already associated with another account
+			return res.status(409).json({
+				error: "The email address is already associated with an account.",
+			});
+		}
+		next(error);
+	}
 };
 
 /**
@@ -189,39 +198,52 @@ export const postUpdatePassword = async (
 		return res.status(400).json({ errors: errors.array() });
 	}
 
-	const user = req.user as UserDocument;
-	User.findById(user.id, (err: NativeError, user: UserDocument) => {
-		if (err) {
-			return next(err);
+	try {
+		const userId = (req.user as UserInstance).id; // Assuming you have a user object in the request with an 'id' property
+
+		const user = await User.findByPk(userId);
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
 		}
+
 		user.password = req.body.password;
-		user.save((err: WriteError & CallbackError) => {
-			if (err) {
-				return next(err);
-			}
-			// Return success message as JSON
-			return res.status(200).json({ message: "Password has been changed." });
-		});
-	});
+
+		await user.save();
+
+		return res.status(200).json({ message: "Password has been changed." });
+	} catch (error) {
+		next(error);
+	}
 };
 
 /**
  * Delete user account.
  * @route POST /account/delete
  */
-export const postDeleteAccount = (
+export const postDeleteAccount = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-): void => {
-	const user = req.user as UserDocument;
-	User.remove({ _id: user.id }, (err) => {
-		if (err) {
-			return next(err);
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const userId = (req.user as UserInstance).id; // Assuming you have a user object in the request with an 'id' property
+
+		const user = await User.findByPk(userId);
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
 		}
+
+		await user.destroy();
+
+		// If you're using Passport.js for authentication, you can log the user out
 		req.logout();
+
 		return res.status(200).json({ message: "Your account has been deleted" });
-	});
+	} catch (error) {
+		next(error);
+	}
 };
 
 /**
@@ -248,32 +270,45 @@ export const postReset = async (
 
 	async.waterfall(
 		[
-			function resetPassword(done: (err: any, user: UserDocument) => void) {
-				User.findOne({ passwordResetToken: req.params.token })
-					.where("passwordResetExpires")
-					.gt(Date.now())
-					.exec((err, user: any) => {
-						if (err) {
-							return next(err);
-						}
-						if (!user) {
-							return res.status(401).json({
-								message: "Password reset token is invalid or has expired.",
-							});
-						}
-						user.password = req.body.password;
-						user.passwordResetToken = undefined;
-						user.passwordResetExpires = undefined;
-						user.save((err: WriteError) => {
-							if (err) {
-								return next(err);
-							}
-							// req.logIn(user, (err) => {
-							// 	done(err, user);
-							// });
-							done(err, user);
-						});
+			async function resetPassword(
+				done: (err: any, user: UserDocument) => void
+			) {
+				try {
+					const { token } = req.params;
+					const user = await User.findOne({
+						where: {
+							passwordResetToken: token,
+							passwordResetExpires: {
+								[Op.gt]: new Date(), // Check if the reset token has not expired
+							},
+						},
 					});
+
+					if (!user) {
+						return res.status(401).json({
+							message: "Password reset token is invalid or has expired.",
+						});
+					}
+
+					// Update the user's password and reset token
+					user.password = req.body.password;
+					user.passwordResetToken = null; // Assuming your column allows null values
+					user.passwordResetExpires = null; // Assuming your column allows null values
+
+					await user.save();
+
+					// You can log the user in here if needed
+					// req.logIn(user, (err) => {
+					//   if (err) {
+					//     return next(err);
+					//   }
+					//   res.json({ message: 'Password reset successful.' });
+					// });
+
+					done(undefined, user);
+				} catch (error) {
+					return next(error);
+				}
 			},
 			function sendResetPasswordEmail(
 				user: UserDocument,
@@ -336,36 +371,38 @@ export const postForgot = async (
 					done(err, token);
 				});
 			},
-			function setRandomToken(
-				token: AuthToken,
+			async function setRandomToken(
+				token: string,
 				done: (
 					err: NativeError | WriteError,
-					token?: AuthToken,
+					token?: string,
 					user?: UserDocument
 				) => void
 			) {
-				User.findOne(
-					{ email: req.body.email },
-					(err: NativeError, user: any) => {
-						if (err) {
-							return done(err);
-						}
-						if (!user) {
-							req.flash("errors", {
-								msg: "Account with that email address does not exist.",
-							});
-							return res.redirect("/forgot");
-						}
-						user.passwordResetToken = token;
-						user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-						user.save((err: WriteError) => {
-							done(err, token, user);
+				try {
+					const { email } = req.body;
+
+					const user = await User.findOne({ where: { email } });
+
+					if (!user) {
+						return res.status(404).json({
+							message: "Account with that email address does not exist.",
 						});
 					}
-				);
+					const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+					user.passwordResetToken = token;
+					user.passwordResetExpires = resetExpires;
+
+					await user.save();
+
+					done(null, token, user);
+				} catch (error) {
+					done(error);
+				}
 			},
 			function sendForgotPasswordEmail(
-				token: AuthToken,
+				token: string,
 				user: UserDocument,
 				done: (err: Error) => void
 			) {

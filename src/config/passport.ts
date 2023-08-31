@@ -3,9 +3,10 @@ import passportLocal from "passport-local";
 import { find } from "lodash";
 
 // import { User, UserType } from '../models/User';
-import { User, UserDocument } from "../models/User";
+import { User, UserDocument } from "../models/user.model";
 import { Request, Response, NextFunction } from "express";
 import { NativeError } from "mongoose";
+import sequelize from "../sequelize";
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -13,21 +14,22 @@ passport.serializeUser<any, any>((req, user, done) => {
 	done(undefined, user);
 });
 
-passport.deserializeUser((id, done) => {
-	User.findById(id, (err: NativeError, user: UserDocument) => done(err, user));
+passport.deserializeUser(async (id: number, done) => {
+	const user = await User.findByPk(id);
+	done(undefined, user);
 });
 
 /**
  * Sign in using Email and Password.
  */
 passport.use(
-	new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-		User.findOne(
-			{ email: email.toLowerCase() },
-			(err: NativeError, user: UserDocument) => {
-				if (err) {
-					return done(err);
-				}
+	new LocalStrategy(
+		{ usernameField: "email" },
+		async (email, password, done) => {
+			try {
+				const user = await User.findOne({
+					where: { email: email.toLowerCase() },
+				});
 				if (!user) {
 					return done(undefined, false, {
 						message: `Email ${email} not found.`,
@@ -44,9 +46,13 @@ passport.use(
 						message: "Invalid email or password.",
 					});
 				});
+			} catch (err) {
+				if (err) {
+					return done(err);
+				}
 			}
-		);
-	})
+		}
+	)
 );
 
 /**
@@ -66,18 +72,18 @@ export const isAuthenticated = (
 /**
  * Authorization Required middleware.
  */
-export const isAuthorized = (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
-	const provider = req.path.split("/").slice(-1)[0];
+// export const isAuthorized = (
+// 	req: Request,
+// 	res: Response,
+// 	next: NextFunction
+// ) => {
+// 	const provider = req.path.split("/").slice(-1)[0];
 
-	const user = req.user as UserDocument;
-	if (find(user.tokens, { kind: provider })) {
-		next();
-	} else {
-		// res.redirect(`/auth/${provider}`);
-		res.status(403).send({ message: "You've been signed out" });
-	}
-};
+// 	const user = req.user as UserDocument;
+// 	if (find(user.tokens, { kind: provider })) {
+// 		next();
+// 	} else {
+// 		// res.redirect(`/auth/${provider}`);
+// 		res.status(403).send({ message: "You've been signed out" });
+// 	}
+// };

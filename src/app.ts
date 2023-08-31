@@ -11,8 +11,8 @@ import mongoose, { ConnectOptions } from "mongoose";
 import passport from "passport";
 import bluebird from "bluebird";
 import winston from "winston";
-import { MONGODB_URI, SESSION_SECRET } from "./util/secrets";
-import { User, UserDocument, AuthToken, UserType } from "./models/User";
+import { SESSION_SECRET } from "./util/secrets";
+import { User, UserDocument, UserType } from "./models/user.model";
 
 // Controllers (route handlers)
 import * as userController from "./controllers/user";
@@ -22,31 +22,47 @@ import * as passportConfig from "./config/passport";
 import { type } from "os";
 import { MongoClientOptions } from "mongodb";
 
+import sequelize from "./sequelize"; // Adjust the path as needed
+import { init as initUserModel } from "./models/user.model"; // Adjust the path as needed
+
 // Create Express server
 const app = express();
 
-// Connect to MongoDB
-const mongoUrl = MONGODB_URI;
-mongoose.Promise = bluebird;
+// Initialize models
+initUserModel();
 
-mongoose
-	.connect(mongoUrl, {
-		useNewUrlParser: true,
-		useCreateIndex: true,
-		useUnifiedTopology: true,
-	} as ConnectOptions)
+// Sync the database
+sequelize
+	.authenticate()
 	.then(() => {
-		/** ready to use. The `mongoose.connect()` promise resolves to undefined. */
-		console.log("Connected to MongoDB");
-		// userAdd();
-		console.log(mongoUrl);
+		console.log("Connected to the database");
 	})
 	.catch((err) => {
-		console.log(
-			`MongoDB connection error. Please make sure MongoDB is running. ${err}`
-		);
-		// process.exit();
+		console.error("Unable to connect to the database:", err);
 	});
+
+// Connect to MongoDB
+// const mongoUrl = MONGODB_URI;
+// mongoose.Promise = bluebird;
+
+// mongoose
+// 	.connect(mongoUrl, {
+// 		useNewUrlParser: true,
+// 		useCreateIndex: true,
+// 		useUnifiedTopology: true,
+// 	} as ConnectOptions)
+// 	.then(() => {
+// 		/** ready to use. The `mongoose.connect()` promise resolves to undefined. */
+// 		console.log("Connected to MongoDB");
+// 		// userAdd();
+// 		console.log(mongoUrl);
+// 	})
+// 	.catch((err) => {
+// 		console.log(
+// 			`MongoDB connection error. Please make sure MongoDB is running. ${err}`
+// 		);
+// 		// process.exit();
+// 	});
 
 // Express configuration
 app.set("port", process.env.PORT || 3000);
@@ -55,17 +71,17 @@ app.set("view engine", "pug");
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(
-	session({
-		resave: true,
-		saveUninitialized: true,
-		secret: SESSION_SECRET,
-		store: new MongoStore({
-			mongoUrl,
-			mongoOptions: {} as MongoClientOptions,
-		}),
-	})
-);
+// app.use(
+// 	session({
+// 		resave: true,
+// 		saveUninitialized: true,
+// 		secret: SESSION_SECRET,
+// 		store: new MongoStore({
+// 			mongoUrl,
+// 			mongoOptions: {} as MongoClientOptions,
+// 		}),
+// 	})
+// );
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
@@ -97,23 +113,23 @@ const logger = winston.createLogger({
 // 		console.error("Error connecting to MongoDB:", error);
 // 	});
 
-async function userAdd() {
-	const user = new User({
-		email: "ohiemidivine8@gmail.com",
-		password: "typescriptSolos",
-		name: "Divine Samuel",
-		userType: UserType.Student,
-	});
+// async function userAdd() {
+// 	const user = new User({
+// 		email: "ohiemidivine8@gmail.com",
+// 		password: "typescriptSolos",
+// 		name: "Divine Samuel",
+// 		userType: UserType.Student,
+// 	});
 
-	User.findOne(
-		{ email: user.email },
-		async (err: any, existingUser: UserDocument) => {
-			if (!existingUser) {
-				await user.save();
-			}
-		}
-	);
-}
+// 	User.findOne(
+// 		{ email: user.email },
+// 		async (err: any, existingUser: UserDocument) => {
+// 			if (!existingUser) {
+// 				await user.save();
+// 			}
+// 		}
+// 	);
+// }
 
 /**
  * Primary app routes.

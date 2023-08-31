@@ -2,11 +2,52 @@ import request from "supertest";
 import app from "../src/app";
 import { expect } from "chai";
 
+describe("POST /signup", () => {
+	it("should create a new user", async () => {
+		// Define a mock request body with valid data
+		const requestBody = {
+			name: "Divine Attah",
+			username: "Deaththekidd404",
+			userType: "Student",
+			email: "ohiemidivine8@gmail.com", // An email that already exists on the database
+			password: "typescriptsolos",
+			confirmPassword: "typescriptsolos",
+		};
+
+		const response = await request(app).post("/signup").send(requestBody);
+
+		expect(response.status).to.equal(201);
+		expect(response.body).to.have.property(
+			"message",
+			"User registered successfully."
+		);
+	}, 60000);
+
+	it("should return an error for duplicate email", async () => {
+		const requestBody = {
+			name: "Divine Attah-Ohiemi",
+			username: "Deaththekidd",
+			userType: "Student",
+			email: "ohiemidivine7@gmail.com", // An email that already exists on the database
+			password: "typescriptsolos",
+			confirmPassword: "typescriptsolos",
+		};
+
+		const response = await request(app).post("/signup").send(requestBody);
+
+		expect(response.status).to.equal(409);
+		expect(response.body).to.have.property(
+			"error",
+			"Account with that email address already exists."
+		);
+	}, 10000);
+});
+
 describe("POST /login", () => {
 	it("should return a success message and user data on successful login", (done) => {
 		request(app)
 			.post("/login")
-			.send({ email: "ohiemidivine7@gmail.com", password: "Pendejos001!" }) // Replace with valid test data
+			.send({ email: "ohiemidivine7@gmail.com", password: "typescriptsolos" }) // Replace with valid test data
 			.expect(200) // Expecting a 200 status code for a successful login
 			.end((err, res) => {
 				if (err) return done(err);
