@@ -1,6 +1,8 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 import bcrypt from "bcrypt-nodejs";
 import sequelize from "../sequelize";
+import { Staff } from "./staff.model";
+import { Student } from "./student.model";
 
 // Define the UserType enum
 export enum UserType {
@@ -11,7 +13,7 @@ export enum UserType {
 }
 
 export interface UserDocument {
-	id?: number;
+	id?: string;
 	username: string;
 	password: string;
 	email: string;
@@ -71,6 +73,19 @@ export const initUserModel = (sequelize: Sequelize) => {
 };
 
 export const User = initUserModel(sequelize);
+
+User.hasOne(Staff, { foreignKey: "UserID", as: "Staff" });
+User.hasOne(Student, { foreignKey: "UserID", as: "Student" });
+Student.belongsTo(User, {
+	foreignKey: "UserID",
+	constraints: false,
+	as: "User",
+});
+Staff.belongsTo(User, {
+	foreignKey: "UserID",
+	constraints: false,
+	as: "User",
+});
 
 export async function init() {
 	try {

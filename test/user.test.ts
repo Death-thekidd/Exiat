@@ -6,10 +6,13 @@ describe("POST /signup", () => {
 	it("should create a new user", async () => {
 		// Define a mock request body with valid data
 		const requestBody = {
-			name: "Divine Attah",
-			username: "Deaththekidd404",
+			name: "Divine Attah-Ohiemi",
+			username: "Deaththekidd",
 			userType: "Student",
-			email: "ohiemidivine8@gmail.com",
+			email: "ohiemidivine7@gmail.com",
+			guardianEmail: "ohiemidivine8@gmail.com",
+			guardianPhone: "08107146846",
+			guardianName: "Popsy",
 			password: "typescriptsolos",
 			confirmPassword: "typescriptsolos",
 		};

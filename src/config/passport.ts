@@ -7,6 +7,8 @@ import { User, UserDocument } from "../models/user.model";
 import { Request, Response, NextFunction } from "express";
 import { NativeError } from "mongoose";
 import sequelize from "../sequelize";
+import { Student } from "../models/student.model";
+import { Staff } from "../models/staff.model";
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -35,12 +37,21 @@ passport.use(
 						message: `Email ${email} not found.`,
 					});
 				}
-				user.comparePassword(password, (err: Error, isMatch: boolean) => {
+				user.comparePassword(password, async (err: Error, isMatch: boolean) => {
 					if (err) {
 						return done(err);
 					}
 					if (isMatch) {
-						return done(undefined, user);
+						if (user.userType === "Student") {
+							const student = await Student.findOne({
+								where: { UserID: user.id },
+							});
+							return done(undefined, student);
+						}
+						const staff = await Staff.findOne({
+							where: { UserID: user.id },
+						});
+						return done(undefined, staff);
 					}
 					return done(undefined, false, {
 						message: "Invalid email or password.",

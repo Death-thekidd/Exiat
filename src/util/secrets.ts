@@ -23,6 +23,11 @@ export const MYSQL_DB_NAME = process.env["MYSQL_DB_NAME"];
 export const MYSQL_DB_USER = process.env["MYSQL_DB_USER"];
 export const MYSQL_DB_PASSWORD = process.env["MYSQL_DB_PASSWORD"];
 
+export const SENDER_EMAIL = process.env["SENDER_EMAIL"];
+export const SENDER_PASS = process.env["SENDER_PASS"];
+
+export const PAYSTACK_PUBLIC_KEY = process.env["PAYSTACK_PUBLIC_KEY"];
+
 if (!SESSION_SECRET) {
 	logger.error("No client secret. Set SESSION_SECRET environment variable.");
 	process.exit(1);

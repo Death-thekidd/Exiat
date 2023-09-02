@@ -22,14 +22,18 @@ import * as passportConfig from "./config/passport";
 import { type } from "os";
 import { MongoClientOptions } from "mongodb";
 
-import sequelize from "./sequelize"; // Adjust the path as needed
-import { init as initUserModel } from "./models/user.model"; // Adjust the path as needed
+import sequelize from "./sequelize";
+import { init as initUserModel } from "./models/user.model";
+import { init as initStaffModel } from "./models/staff.model";
+import { init as initStudentModel } from "./models/student.model";
 
 // Create Express server
 const app = express();
 
 // Initialize models
 initUserModel();
+initStaffModel();
+initStudentModel();
 
 // Sync the database
 sequelize

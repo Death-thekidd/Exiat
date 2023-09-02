@@ -16,6 +16,9 @@ import "../config/passport";
 import { CallbackError, NativeError } from "mongoose";
 import { Op } from "sequelize";
 import sequelize from "../sequelize";
+import { Staff } from "../models/staff.model";
+import { Student } from "../models/student.model";
+import sendMail from "../sendMail";
 
 /**
  * Sign in using email and password.
@@ -109,15 +112,36 @@ export const postSignup = async (
 	}
 
 	try {
-		await User.create({
+		const user = await User.create({
 			username: req.body.username,
 			name: req.body.name,
 			userType: req.body.userType,
 			password: req.body.password,
 			email: req.body.email,
 		});
+		if (req.body.userType === "Staff") {
+			const staff = await Staff.create({
+				staffType: req.body.staffType,
+				username: user.username,
+				name: user.name,
+				email: user.email,
+				password: user.password,
+				UserID: user.id, // Associate with the User
+			});
+		} else {
+			const student = await Student.create({
+				guardianEmail: req.body.guardianEmail,
+				guardianPhone: req.body.guardianPhone,
+				guardianName: req.body.guardianName,
+				username: user.username,
+				name: user.name,
+				email: user.email,
+				password: user.password,
+				UserID: user.id, // Associate with the User
+			});
+		}
 	} catch (error) {
-		console.error("Unable to create table : ", error);
+		console.error("Unable to create User record : ", error);
 		return res.status(500).json({ error: "Something went wrong" });
 	}
 
@@ -401,30 +425,24 @@ export const postForgot = async (
 					done(error);
 				}
 			},
-			function sendForgotPasswordEmail(
+			async function sendForgotPasswordEmail(
 				token: string,
 				user: UserDocument,
 				done: (err: Error) => void
 			) {
-				const transporter = nodemailer.createTransport({
-					service: "SendGrid",
-					auth: {
-						user: process.env.SENDGRID_USER,
-						pass: process.env.SENDGRID_PASSWORD,
-					},
-				});
-				const mailOptions = {
-					to: user.email,
-					from: "hackathon@starter.com",
-					subject: "Reset your password on Hackathon Starter",
-					text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-          Please click on the following link, or paste this into your browser to complete the process:\n\n
-          http://${req.headers.host}/reset/${token}\n\n
-          If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-				};
-				transporter.sendMail(mailOptions, (err) => {
+				try {
+					await sendMail(
+						[user.email],
+						"Reset your password on Exiat",
+						`You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+					Please click on the following link, or paste this into your browser to complete the process:\n\n
+					http://${req.headers.host}/reset/${token}\n\n
+					If you did not request this, please ignore this email and your password will remain unchanged.\n`
+					);
+					done(undefined);
+				} catch (err) {
 					done(err);
-				});
+				}
 			},
 		],
 		(err) => {
