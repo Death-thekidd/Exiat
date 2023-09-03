@@ -18,10 +18,12 @@ export interface LeaveRequestDocument {
 	departureDate: Date;
 	returnDate: Date;
 	isApproved: boolean;
+	isRejected: boolean;
 	isCheckedIn: boolean;
+	isCheckedOut: boolean;
 	isFinePaid: boolean;
-	StudentID: number;
-	StaffID: number;
+	StudentID: string;
+	StaffID: string;
 }
 
 export interface LeaveRequestInstance
@@ -34,7 +36,7 @@ export interface AuthToken {
 }
 
 export const initLeaveRequestModel = (sequelize: Sequelize) => {
-	const LeaveRequest = sequelize.define<LeaveRequestInstance>("Staff", {
+	const LeaveRequest = sequelize.define<LeaveRequestInstance>("LeaveRequest", {
 		id: {
 			type: DataTypes.UUID,
 			defaultValue: DataTypes.UUIDV4,
@@ -45,8 +47,10 @@ export const initLeaveRequestModel = (sequelize: Sequelize) => {
 		reason: { type: DataTypes.STRING, allowNull: false },
 		departureDate: { type: DataTypes.DATE, allowNull: false },
 		returnDate: { type: DataTypes.DATE, allowNull: false },
-		isApproved: { type: DataTypes.BOOLEAN, allowNull: false },
-		isCheckedIn: { type: DataTypes.BOOLEAN, allowNull: false },
+		isApproved: { type: DataTypes.BOOLEAN },
+		isRejected: { type: DataTypes.BOOLEAN },
+		isCheckedIn: { type: DataTypes.BOOLEAN },
+		isCheckedOut: { type: DataTypes.BOOLEAN },
 		isFinePaid: { type: DataTypes.BOOLEAN, allowNull: false },
 		StudentID: {
 			type: DataTypes.UUID,

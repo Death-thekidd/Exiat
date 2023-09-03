@@ -55,12 +55,6 @@ export const initStudentModel = (sequelize: Sequelize) => {
 };
 
 export const Student = initStudentModel(sequelize);
-Student.hasOne(LeaveRequest, { foreignKey: "StudentID", as: "LeaveRequest" });
-LeaveRequest.belongsTo(Student, {
-	foreignKey: "StudentID",
-	constraints: false,
-	as: "Student",
-});
 
 export async function init() {
 	try {

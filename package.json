@@ -25,6 +25,7 @@
 		"watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\""
 	},
 	"dependencies": {
+		"@types/cors": "^2.8.13",
 		"@types/mongoose": "^5.11.97",
 		"@types/node-schedule": "^2.1.0",
 		"async": "3.2.2",
@@ -33,6 +34,8 @@
 		"body-parser": "1.19.0",
 		"compression": "1.7.4",
 		"connect-mongo": "^5.0.0",
+		"connect-session-sequelize": "^7.1.7",
+		"cors": "^2.8.5",
 		"dotenv": "8.2.0",
 		"errorhandler": "1.5.1",
 		"express": "4.17.1",

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt-nodejs";
 import sequelize from "../sequelize";
 import { Staff } from "./staff.model";
 import { Student } from "./student.model";
+import { LeaveRequest } from "./leaveRequest.model";
 
 // Define the UserType enum
 export enum UserType {
@@ -85,6 +86,20 @@ Staff.belongsTo(User, {
 	foreignKey: "UserID",
 	constraints: false,
 	as: "User",
+});
+
+Staff.hasOne(LeaveRequest, { foreignKey: "StaffID", as: "LeaveRequest" });
+LeaveRequest.belongsTo(Staff, {
+	foreignKey: "StaffID",
+	constraints: false,
+	as: "Staff",
+});
+
+Student.hasOne(LeaveRequest, { foreignKey: "StudentID", as: "LeaveRequest" });
+LeaveRequest.belongsTo(Student, {
+	foreignKey: "StudentID",
+	constraints: false,
+	as: "Student",
 });
 
 export async function init() {

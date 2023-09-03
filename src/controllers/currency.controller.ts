@@ -9,19 +9,18 @@ import { Student } from "../models/student.model";
  * Initialize Paystack payment gateway
  * @route POST /initialize-payment
  */
-export const acceptPayment = async (
+export const initializePayment = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ): Promise<Response<any, Record<string, any>>> => {
 	try {
 		// request body from the clients
-		const email = req.body.email;
-		const amount = req.body.amount;
+		const { email, amount } = req.body;
 		// params
 		const params = JSON.stringify({
 			email: email,
-			amount: amount * 100,
+			amount: amount,
 		});
 		// options
 		const options = {
@@ -34,7 +33,6 @@ export const acceptPayment = async (
 				"Content-Type": "application/json",
 			},
 		};
-		// client request to paystack API
 		const clientReq = https
 			.request(options, (apiRes) => {
 				let data = "";
@@ -52,7 +50,6 @@ export const acceptPayment = async (
 		clientReq.write(params);
 		clientReq.end();
 	} catch (error) {
-		// Handle any errors that occur during the request
 		console.error(error);
 		return res.status(500).json({ error: "An error occurred" });
 	}

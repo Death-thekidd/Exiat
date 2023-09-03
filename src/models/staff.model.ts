@@ -56,12 +56,6 @@ export const initStaffModel = (sequelize: Sequelize) => {
 };
 
 export const Staff = initStaffModel(sequelize);
-Staff.hasOne(LeaveRequest, { foreignKey: "StaffID", as: "LeaveRequest" });
-LeaveRequest.belongsTo(Staff, {
-	foreignKey: "StaffID",
-	constraints: false,
-	as: "Staff",
-});
 
 export async function init() {
 	try {
