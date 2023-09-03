@@ -48,7 +48,7 @@ export const initStudentModel = (sequelize: Sequelize) => {
 		guardianEmail: { type: DataTypes.STRING, allowNull: false },
 		guardianPhone: { type: DataTypes.STRING, allowNull: false },
 		guardianName: { type: DataTypes.STRING, allowNull: false },
-		balance: { type: DataTypes.NUMBER, defaultValue: 0 },
+		balance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 	});
 
 	return Student;
@@ -59,7 +59,7 @@ export const Student = initStudentModel(sequelize);
 export async function init() {
 	try {
 		await Student.sequelize.sync();
-		console.log("Database and tables synced successfully");
+		// console.log("Database and tables synced successfully");
 	} catch (error) {
 		console.error("Error syncing database:", error);
 	}

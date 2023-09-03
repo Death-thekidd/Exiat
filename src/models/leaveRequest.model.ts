@@ -51,7 +51,7 @@ export const initLeaveRequestModel = (sequelize: Sequelize) => {
 		isRejected: { type: DataTypes.BOOLEAN },
 		isCheckedIn: { type: DataTypes.BOOLEAN },
 		isCheckedOut: { type: DataTypes.BOOLEAN },
-		isFinePaid: { type: DataTypes.BOOLEAN, allowNull: false },
+		isFinePaid: { type: DataTypes.BOOLEAN },
 		StudentID: {
 			type: DataTypes.UUID,
 			allowNull: false,
@@ -77,7 +77,7 @@ export const LeaveRequest = initLeaveRequestModel(sequelize);
 export async function init() {
 	try {
 		await LeaveRequest.sequelize.sync();
-		console.log("Database and tables synced successfully");
+		// console.log("Database and tables synced successfully");
 	} catch (error) {
 		console.error("Error syncing database:", error);
 	}

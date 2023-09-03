@@ -60,7 +60,7 @@ export const Staff = initStaffModel(sequelize);
 export async function init() {
 	try {
 		await Staff.sequelize.sync();
-		console.log("Database and tables synced successfully");
+		// console.log("Database and tables synced successfully");
 	} catch (error) {
 		console.error("Error syncing database:", error);
 	}

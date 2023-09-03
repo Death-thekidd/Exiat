@@ -19,9 +19,15 @@ export const MYSQL_DB_HOST = prod
 	? process.env["MYSQL_DB_HOST"]
 	: process.env["MYSQL_DB_HOST_LOCAL"];
 
-export const MYSQL_DB_NAME = process.env["MYSQL_DB_NAME"];
-export const MYSQL_DB_USER = process.env["MYSQL_DB_USER"];
-export const MYSQL_DB_PASSWORD = process.env["MYSQL_DB_PASSWORD"];
+export const MYSQL_DB_NAME = prod
+	? process.env["MYSQL_DB_NAME"]
+	: process.env["MYSQL_DB_NAME_LOCAL"];
+export const MYSQL_DB_USER = prod
+	? process.env["MYSQL_DB_USER"]
+	: process.env["MYSQL_DB_USER_LOCAL"];
+export const MYSQL_DB_PASSWORD = prod
+	? process.env["MYSQL_DB_PASSWORD"]
+	: process.env["MYSQL_DB_PASSWORD_LOCAL"];
 
 export const SENDER_EMAIL = process.env["SENDER_EMAIL"];
 export const SENDER_PASS = process.env["SENDER_PASS"];

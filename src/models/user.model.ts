@@ -105,7 +105,7 @@ LeaveRequest.belongsTo(Student, {
 export async function init() {
 	try {
 		await User.sequelize.sync();
-		console.log("Database and tables synced successfully");
+		// console.log("Database and tables synced successfully");
 	} catch (error) {
 		console.error("Error syncing database:", error);
 	}

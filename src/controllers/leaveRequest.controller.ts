@@ -23,84 +23,87 @@ export const submitLeaveRequest = async (
 	res: Response,
 	next: NextFunction
 ): Promise<Response<any, Record<string, any>>> => {
-	await check("reason", "Reason can not be blank")
-		.isLength({ min: 1 })
-		.run(req);
-	const errors = validationResult(req);
+	try {
+		await check("reason", "Reason can not be blank")
+			.isLength({ min: 1 })
+			.run(req);
+		const errors = validationResult(req);
 
-	if (!errors.isEmpty()) {
-		// Return validation errors as JSON
-		return res.status(400).json({ errors: errors.array() });
-	}
-
-	async.waterfall(
-		[
-			async function checkBalance(
-				done: (err: Error, student: StudentInstance) => void
-			) {
-				const student = await Student.findByPk(req.body.id);
-				if (student.balance <= 0)
-					return res.status(401).json({ error: "Insufficient Balance" });
-				done(undefined, student);
-			},
-			async function saveRequest(
-				student: StudentInstance,
-				done: (
-					err: Error,
-					request: LeaveRequestInstance,
-					student: StudentInstance
-				) => void
-			) {
-				try {
-					const { reason, departureDate, returnDate, id } = req.body;
-					const request = await LeaveRequest.create({
-						reason: reason,
-						departureDate: departureDate,
-						returnDate: returnDate,
-						StudentID: id,
-					});
-					done(undefined, request, student);
-				} catch (error) {
-					console.error("Unable to create Leave request : ", error);
-					return next(error);
-				}
-			},
-			async function subtractFee(
-				request: LeaveRequestInstance,
-				student: StudentInstance,
-				done: (err: Error, request: LeaveRequestInstance) => void
-			) {
-				try {
-					student.balance -= 1;
-					await student.save();
-				} catch (error) {
-					console.error("Unable to subtract fee : ", error);
-					return next(error);
-				}
-				done(undefined, request);
-			},
-			// async function sendEmails(
-			// 	request: LeaveRequestInstance,
-			// 	done: (err: Error) => void
-			// ) {
-			// 	try {
-			// 		await sendMail([], "", "");
-			// 	} catch (error) {
-			// 		console.error("Unable to send email : ", error);
-			// 		return next(error);
-			// 	}
-			// },
-		],
-		(err) => {
-			if (err) {
-				return next(err);
-			}
+		if (!errors.isEmpty()) {
+			// Return validation errors as JSON
+			return res.status(400).json({ errors: errors.array() });
 		}
-	);
 
-	return res
-		.status(201)
-		.json({ message: "Leave Request submitted successfully." });
+		async.waterfall(
+			[
+				async function checkStudent(
+					done: (err: Error, student: StudentInstance) => void
+				) {
+					const student = await Student.findByPk(req.body.id);
+					if (!student) {
+						return done(new Error("Student not found."), null); // Pass an error to the next function
+					}
+					done(undefined, student);
+				},
+				async function checkBalance(
+					student: StudentInstance,
+					done: (err: Error | null, student: StudentInstance) => void
+				) {
+					if (student.balance <= 0) {
+						return done(new Error("Insufficient Balance"), null); // Pass an error to the next function
+					}
+					done(null, student);
+				},
+				async function saveRequest(
+					student: StudentInstance,
+					done: (
+						err: Error,
+						request: LeaveRequestInstance,
+						student: StudentInstance
+					) => void
+				) {
+					try {
+						const { reason, departureDate, returnDate, id } = req.body;
+						const request = await LeaveRequest.create({
+							reason: reason,
+							departureDate: departureDate,
+							returnDate: returnDate,
+							StudentID: id,
+						});
+						done(null, request, student);
+					} catch (error) {
+						console.error("Unable to create Leave request : ", error);
+						return done(error, null, null); // Pass an error to the next function
+					}
+				},
+				async function subtractFee(
+					request: LeaveRequestInstance,
+					student: StudentInstance,
+					done: (err: Error, request: LeaveRequestInstance) => void
+				) {
+					try {
+						student.balance -= 1;
+						await student.save();
+						done(null, request);
+					} catch (error) {
+						console.error("Unable to subtract fee : ", error);
+						return done(error, null); // Pass an error to the next function
+					}
+				},
+			],
+			(err) => {
+				if (err) {
+					return next(err); // Handle errors at the end of the waterfall
+				}
+
+				return res
+					.status(201)
+					.json({ message: "Leave Request submitted successfully." });
+			}
+		);
+	} catch (error) {
+		return res.status(500).json({ error: error });
+	}
 };
 
 /**
