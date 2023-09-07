@@ -1,0 +1,4 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/almanara/public_html/exiat/
+    - /bin/cp -R . $DEPLOYPATH
