@@ -77,7 +77,7 @@ sequelize
 // 	});
 
 // Express configuration
-app.set("port", process.env.HTTPS_PORT || 443);
+app.set("port", process.env.HTTPS_PORT || 8443);
 app.set("views", path.join(__dirname, "../views"));
 app.set("view engine", "pug");
 app.use(compression());
