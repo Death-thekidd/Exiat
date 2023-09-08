@@ -1,6 +1,7 @@
 import errorHandler from "errorhandler";
 import app from "./app";
 import https from "https";
+import fs from "fs";
 
 /**
  * Error Handler. Provides full stack
@@ -12,7 +13,12 @@ if (process.env.NODE_ENV === "development") {
 /**
  * Start Express server.
  */
-const httpsServer = https.createServer({}, app);
+const httpsOptions: any = {
+	privateKey: fs.readFileSync("./src/certificates/ssl.key", "utf8"),
+	certificate: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
+};
+
+const httpsServer = https.createServer(httpsOptions, app);
 const server = httpsServer.listen(app.get("port"), () => {
 	console.log(
 		"  App is running at http://localhost:%d in %s mode",

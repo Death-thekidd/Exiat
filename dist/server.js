@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const errorhandler_1 = __importDefault(require("errorhandler"));
 const app_1 = __importDefault(require("./app"));
 const https_1 = __importDefault(require("https"));
+const fs_1 = __importDefault(require("fs"));
 /**
  * Error Handler. Provides full stack
  */
@@ -15,7 +16,11 @@ if (process.env.NODE_ENV === "development") {
 /**
  * Start Express server.
  */
-const httpsServer = https_1.default.createServer({}, app_1.default);
+const httpsOptions = {
+    privateKey: fs_1.default.readFileSync("./src/certificates/ssl.key", "utf8"),
+    certificate: fs_1.default.readFileSync("./src/certificates/certificate.crt", "utf8"),
+};
+const httpsServer = https_1.default.createServer(httpsOptions, app_1.default);
 const server = httpsServer.listen(app_1.default.get("port"), () => {
     console.log("  App is running at http://localhost:%d in %s mode", app_1.default.get("port"), app_1.default.get("env"));
     console.log("  Press CTRL-C to stop\n");
