@@ -15,8 +15,8 @@ if (process.env.NODE_ENV === "development") {
  * Start Express server.
  */
 const httpsOptions: any = {
-	privateKey: fs.readFileSync("./src/certificates/ssl.key", "utf8"),
-	certificate: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
+	Key: fs.readFileSync("./src/certificates/ssl.key", "utf8"),
+	cert: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
 };
 
 const httpServer = http.createServer(app).listen(process.env.PORT || 3001);
