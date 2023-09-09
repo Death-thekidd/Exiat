@@ -14,14 +14,14 @@ if (process.env.NODE_ENV === "development") {
 /**
  * Start Express server.
  */
-const httpsOptions: any = {
-	Key: fs.readFileSync("./src/certificates/ssl.key", "utf8"),
-	cert: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
-};
+// const httpsOptions: any = {
+// 	Key: fs.readFileSync("./src/certificates/ssl.key", "utf8"),
+// 	cert: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
+// };
 
-const httpServer = http.createServer(app).listen(process.env.PORT || 3001);
-const httpsServer = https.createServer(httpsOptions, app);
-const server = httpsServer.listen(app.get("port"), () => {
+// const httpServer = http.createServer(app).listen(process.env.PORT || 3001);
+// const httpsServer = https.createServer(httpsOptions, app);
+const server = app.listen(app.get("port"), () => {
 	console.log(
 		"  App is running at http://localhost:%d in %s mode",
 		app.get("port"),
@@ -30,4 +30,4 @@ const server = httpsServer.listen(app.get("port"), () => {
 	console.log("  Press CTRL-C to stop\n");
 });
 
-export default httpServer;
+export default server;
