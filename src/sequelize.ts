@@ -1,5 +1,6 @@
 // sequelize.ts
 import { Sequelize } from "sequelize";
+import mysql2 from "mysql2";
 import {
 	MYSQL_DB_HOST,
 	MYSQL_DB_NAME,
@@ -13,6 +14,7 @@ const sequelize = new Sequelize({
 	username: MYSQL_DB_USER, // Your MySQL username
 	password: MYSQL_DB_PASSWORD, // Your MySQL password
 	database: MYSQL_DB_NAME, // Your MySQL database name
+	dialectModule: mysql2,
 });
 
 export default sequelize;
