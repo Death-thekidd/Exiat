@@ -1,6 +1,7 @@
 import errorHandler from "errorhandler";
 import app from "./app";
 import https from "https";
+import http from "http";
 import fs from "fs";
 
 /**
@@ -18,6 +19,7 @@ const httpsOptions: any = {
 	certificate: fs.readFileSync("./src/certificates/certificate.crt", "utf8"),
 };
 
+const httpServer = http.createServer(app).listen(process.env.PORT || 3001);
 const httpsServer = https.createServer(httpsOptions, app);
 const server = httpsServer.listen(app.get("port"), () => {
 	console.log(
@@ -28,4 +30,4 @@ const server = httpsServer.listen(app.get("port"), () => {
 	console.log("  Press CTRL-C to stop\n");
 });
 
-export default server;
+export default httpServer;
