@@ -11,10 +11,5 @@
 			"src": "/(.*)",
 			"dest": "dist/server.js"
 		}
-	],
-	"functions": {
-		"api": {
-			"handler": "dist/server.js"
-		}
-	}
+	]
 }
