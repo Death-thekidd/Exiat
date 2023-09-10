@@ -53,6 +53,7 @@ const initializePayment = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         })
             .on("error", (error) => {
             console.error(error);
+            res.status(500).json({ error: "An error occurred" }); // Send error response
         });
         clientReq.write(params);
         clientReq.end();
@@ -96,6 +97,7 @@ const verifyPayment = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         })
             .on("error", (error) => {
             console.error(error);
+            res.status(500).json({ error: "An error occurred" }); // Send error response
         });
     }
     catch (error) {

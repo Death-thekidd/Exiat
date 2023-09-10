@@ -46,6 +46,7 @@ export const initializePayment = async (
 			})
 			.on("error", (error: Error) => {
 				console.error(error);
+				res.status(500).json({ error: "An error occurred" }); // Send error response
 			});
 		clientReq.write(params);
 		clientReq.end();
@@ -97,6 +98,7 @@ export const verifyPayment = async (
 			})
 			.on("error", (error) => {
 				console.error(error);
+				res.status(500).json({ error: "An error occurred" }); // Send error response
 			});
 	} catch (error) {
 		console.error(error);
