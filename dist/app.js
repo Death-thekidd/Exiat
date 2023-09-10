@@ -99,8 +99,10 @@ app.post("/check-out", leaveRequestController.checkOutStudent);
 app.post("/initialize-payment", currencyController.initializePayment);
 app.post("/verify-transaction", currencyController.verifyPayment);
 app.use((err, req, res, next) => {
-    logger.error(err.message);
-    res.status(err.status || 500).json({ error: "Something went wrong" });
+    if (!res.headersSent) {
+        logger.error(err.message);
+        res.status(err.status || 500).json({ error: "Something went wrong" });
+    }
 });
 exports.default = app;
 //# sourceMappingURL=app.js.map

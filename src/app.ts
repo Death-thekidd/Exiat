@@ -104,8 +104,10 @@ app.post("/initialize-payment", currencyController.initializePayment);
 app.post("/verify-transaction", currencyController.verifyPayment);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-	logger.error(err.message);
-	res.status(err.status || 500).json({ error: "Something went wrong" });
+	if (!res.headersSent) {
+		logger.error(err.message);
+		res.status(err.status || 500).json({ error: "Something went wrong" });
+	}
 });
 
 export default app;
