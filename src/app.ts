@@ -106,7 +106,7 @@ app.post("/verify-transaction", currencyController.verifyPayment);
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 	if (!res.headersSent) {
 		logger.error(err.message);
-		res.status(err.status || 500).json({ error: "Something went wrong" });
+		res.status(err.status || 500).json({ error: err.message });
 	}
 });
 
