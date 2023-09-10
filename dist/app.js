@@ -84,7 +84,7 @@ sequelize_1.default
 // 		// process.exit();
 // 	});
 // Express configuration
-app.set("port", process.env.PORT || 8080);
+app.set("port", process.env.PORT || 3001);
 app.set("views", path_1.default.join(__dirname, "../views"));
 app.set("view engine", "pug");
 app.use(compression_1.default());
