@@ -17,6 +17,9 @@ const leaveRequest_model_1 = require("../models/leaveRequest.model");
 const student_model_1 = require("../models/student.model");
 const express_validator_1 = require("express-validator");
 const async_1 = __importDefault(require("async"));
+const wallet_model_1 = require("../models/wallet.model");
+const wallet_controller_1 = require("./wallet.controller");
+const walletTransaction_model_1 = require("../models/walletTransaction.model");
 /**
  * Create leave request
  * @route POST /submit-request
@@ -43,13 +46,16 @@ const submitLeaveRequest = (req, res, next) => __awaiter(void 0, void 0, void 0,
             },
             function checkBalance(student, done) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    if (student.balance <= 0) {
-                        return done(new Error("Insufficient Balance"), null); // Pass an error to the next function
+                    const wallet = yield wallet_model_1.Wallet.findOne({
+                        where: { UserID: student.UserID },
+                    });
+                    if (wallet.balance <= 0) {
+                        return done(new Error("Insufficient Balance"), null, null); // Pass an error to the next function
                     }
-                    done(null, student);
+                    done(null, student, wallet);
                 });
             },
-            function saveRequest(student, done) {
+            function saveRequest(student, wallet, done) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
                         const { reason, departureDate, returnDate, id } = req.body;
@@ -59,19 +65,20 @@ const submitLeaveRequest = (req, res, next) => __awaiter(void 0, void 0, void 0,
                             returnDate: returnDate,
                             StudentID: id,
                         });
-                        done(null, request, student);
+                        done(null, request, student, wallet);
                     }
                     catch (error) {
                         console.error("Unable to create Leave request : ", error);
-                        return done(error, null, null); // Pass an error to the next function
+                        return done(error, null, null, null); // Pass an error to the next function
                     }
                 });
             },
-            function subtractFee(request, student, done) {
+            function subtractFee(request, student, wallet, done) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        student.balance -= 1;
-                        yield student.save();
+                        yield wallet_controller_1.createWalletTransaction(student.UserID, "completed", walletTransaction_model_1.CurrencyType.NGN, 1000, walletTransaction_model_1.TransactionType.PAYMENT);
+                        wallet.balance -= 1;
+                        yield wallet.save();
                         done(null, request);
                     }
                     catch (error) {

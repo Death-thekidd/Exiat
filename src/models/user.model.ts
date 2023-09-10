@@ -4,6 +4,9 @@ import sequelize from "../sequelize";
 import { Staff } from "./staff.model";
 import { Student } from "./student.model";
 import { LeaveRequest } from "./leaveRequest.model";
+import { Wallet } from "./wallet.model";
+import { WalletTransaction } from "./walletTransaction.model";
+import { Transaction } from "./transaction.model";
 
 // Define the UserType enum
 export enum UserType {
@@ -76,13 +79,14 @@ export const initUserModel = (sequelize: Sequelize) => {
 export const User = initUserModel(sequelize);
 
 User.hasOne(Staff, { foreignKey: "UserID", as: "Staff" });
-User.hasOne(Student, { foreignKey: "UserID", as: "Student" });
-Student.belongsTo(User, {
+Staff.belongsTo(User, {
 	foreignKey: "UserID",
 	constraints: false,
 	as: "User",
 });
-Staff.belongsTo(User, {
+
+User.hasOne(Student, { foreignKey: "UserID", as: "Student" });
+Student.belongsTo(User, {
 	foreignKey: "UserID",
 	constraints: false,
 	as: "User",
@@ -100,6 +104,30 @@ LeaveRequest.belongsTo(Student, {
 	foreignKey: "StudentID",
 	constraints: false,
 	as: "Student",
+});
+
+User.hasOne(Wallet, { foreignKey: "UserID", as: "Wallet" });
+Wallet.belongsTo(User, {
+	foreignKey: "UserID",
+	constraints: false,
+	as: "User",
+});
+
+User.hasOne(Transaction, { foreignKey: "UserID", as: "Transaction" });
+Transaction.belongsTo(User, {
+	foreignKey: "UserID",
+	constraints: false,
+	as: "User",
+});
+
+User.hasOne(WalletTransaction, {
+	foreignKey: "UserID",
+	as: "WalletTransaction",
+});
+WalletTransaction.belongsTo(User, {
+	foreignKey: "UserID",
+	constraints: false,
+	as: "User",
 });
 
 export async function init() {

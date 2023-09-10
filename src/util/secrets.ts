@@ -33,6 +33,7 @@ export const SENDER_EMAIL = process.env["SENDER_EMAIL"];
 export const SENDER_PASS = process.env["SENDER_PASS"];
 
 export const PAYSTACK_PUBLIC_KEY = process.env["PAYSTACK_PUBLIC_KEY"];
+export const PAYSTACK_SECRET_KEY = process.env["PAYSTACK_SECRET_KEY"];
 
 if (!SESSION_SECRET) {
 	logger.error("No client secret. Set SESSION_SECRET environment variable.");

@@ -33,6 +33,7 @@ const connect_session_sequelize_1 = __importDefault(require("connect-session-seq
 const userController = __importStar(require("./controllers/user.controller"));
 const leaveRequestController = __importStar(require("./controllers/leaveRequest.controller"));
 const currencyController = __importStar(require("./controllers/currency.controller"));
+const walletController = __importStar(require("./controllers/wallet.controller"));
 // API keys and Passport configuration
 const passportConfig = __importStar(require("./config/passport"));
 const sequelize_1 = __importDefault(require("./sequelize"));
@@ -40,6 +41,9 @@ const user_model_1 = require("./models/user.model");
 const staff_model_1 = require("./models/staff.model");
 const student_model_1 = require("./models/student.model");
 const leaveRequest_model_1 = require("./models/leaveRequest.model");
+const wallet_model_1 = require("./models/wallet.model");
+const walletTransaction_model_1 = require("./models/walletTransaction.model");
+const transaction_model_1 = require("./models/transaction.model");
 // Create Express server
 const app = express_1.default();
 app.use(cors_1.default());
@@ -48,6 +52,9 @@ user_model_1.init();
 staff_model_1.init();
 student_model_1.init();
 leaveRequest_model_1.init();
+wallet_model_1.init();
+walletTransaction_model_1.init();
+transaction_model_1.init();
 // Sync the database
 sequelize_1.default
     .authenticate()
@@ -97,7 +104,7 @@ app.post("/reject-leave-request", leaveRequestController.rejectLeaveRequest);
 app.post("/check-in", leaveRequestController.checkInStudent);
 app.post("/check-out", leaveRequestController.checkOutStudent);
 app.post("/initialize-payment", currencyController.initializePayment);
-app.post("/verify-transaction", currencyController.verifyPayment);
+app.post("/verify-transaction", walletController.verifyPayment);
 app.use((err, req, res, next) => {
     if (!res.headersSent) {
         logger.error(err.message);

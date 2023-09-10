@@ -1,10 +1,12 @@
 import schedule from "node-schedule";
 import { LeaveRequest } from "../models/leaveRequest.model";
-import https from "https";
-import { PAYSTACK_PUBLIC_KEY } from "../util/secrets";
 import { Op } from "sequelize";
 import { Student } from "../models/student.model";
 import sendMail from "../sendMail";
+import { createWalletTransaction } from "./wallet.controller";
+import { CurrencyType } from "../models/walletTransaction.model";
+import { TransactionType } from "../models/walletTransaction.model";
+import { Wallet } from "../models/wallet.model";
 
 const job = schedule.scheduleJob("0 0 * * *", async () => {
 	try {
@@ -17,7 +19,7 @@ const job = schedule.scheduleJob("0 0 * * *", async () => {
 		});
 
 		for (const request of overdueRequests) {
-			const fineAmount = 10;
+			const fineAmount = 10000;
 
 			const paymentResult = await processFinePayment(
 				request.StudentID,
@@ -52,8 +54,21 @@ export const processFinePayment = async (
 ): Promise<fineReturn> => {
 	try {
 		const student = await Student.findByPk(studentID);
-		if (student.balance >= amount) student.balance -= amount;
-		else throw new Error("Insufficient tokens avilable to process fine");
+		const wallet = await Wallet.findOne({
+			where: { UserID: student.UserID },
+		});
+
+		if (wallet.balance >= amount) {
+			await createWalletTransaction(
+				student.UserID,
+				"completed",
+				CurrencyType.NGN,
+				1000,
+				TransactionType.PAYMENT
+			);
+			wallet.balance -= amount;
+			await wallet.save();
+		} else throw new Error("Insufficient funds avilable to process fine");
 	} catch (error) {
 		return {
 			success: false,

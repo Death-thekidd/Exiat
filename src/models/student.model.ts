@@ -15,7 +15,6 @@ export interface StudentDocument {
 	guardianName: string;
 	username: string;
 	password: string;
-	balance: number;
 	email: string;
 	name: string;
 }
@@ -48,7 +47,6 @@ export const initStudentModel = (sequelize: Sequelize) => {
 		guardianEmail: { type: DataTypes.STRING, allowNull: false },
 		guardianPhone: { type: DataTypes.STRING, allowNull: false },
 		guardianName: { type: DataTypes.STRING, allowNull: false },
-		balance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 	});
 
 	return Student;

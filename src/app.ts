@@ -11,6 +11,7 @@ import SequelizeStore from "connect-session-sequelize";
 import * as userController from "./controllers/user.controller";
 import * as leaveRequestController from "./controllers/leaveRequest.controller";
 import * as currencyController from "./controllers/currency.controller";
+import * as walletController from "./controllers/wallet.controller";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -20,6 +21,9 @@ import { init as initUserModel } from "./models/user.model";
 import { init as initStaffModel } from "./models/staff.model";
 import { init as initStudentModel } from "./models/student.model";
 import { init as initLeaveRequestModel } from "./models/leaveRequest.model";
+import { init as initWalletModel } from "./models/wallet.model";
+import { init as initWalletTransactionModel } from "./models/walletTransaction.model";
+import { init as initTransactionModel } from "./models/transaction.model";
 
 // Create Express server
 const app = express();
@@ -31,6 +35,9 @@ initUserModel();
 initStaffModel();
 initStudentModel();
 initLeaveRequestModel();
+initWalletModel();
+initWalletTransactionModel();
+initTransactionModel();
 
 // Sync the database
 sequelize
@@ -101,7 +108,7 @@ app.post("/check-in", leaveRequestController.checkInStudent);
 app.post("/check-out", leaveRequestController.checkOutStudent);
 
 app.post("/initialize-payment", currencyController.initializePayment);
-app.post("/verify-transaction", currencyController.verifyPayment);
+app.post("/verify-transaction", walletController.verifyPayment);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 	if (!res.headersSent) {

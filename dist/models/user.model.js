@@ -19,6 +19,9 @@ const sequelize_2 = __importDefault(require("../sequelize"));
 const staff_model_1 = require("./staff.model");
 const student_model_1 = require("./student.model");
 const leaveRequest_model_1 = require("./leaveRequest.model");
+const wallet_model_1 = require("./wallet.model");
+const walletTransaction_model_1 = require("./walletTransaction.model");
+const transaction_model_1 = require("./transaction.model");
 // Define the UserType enum
 var UserType;
 (function (UserType) {
@@ -62,13 +65,13 @@ const initUserModel = (sequelize) => {
 exports.initUserModel = initUserModel;
 exports.User = exports.initUserModel(sequelize_2.default);
 exports.User.hasOne(staff_model_1.Staff, { foreignKey: "UserID", as: "Staff" });
-exports.User.hasOne(student_model_1.Student, { foreignKey: "UserID", as: "Student" });
-student_model_1.Student.belongsTo(exports.User, {
+staff_model_1.Staff.belongsTo(exports.User, {
     foreignKey: "UserID",
     constraints: false,
     as: "User",
 });
-staff_model_1.Staff.belongsTo(exports.User, {
+exports.User.hasOne(student_model_1.Student, { foreignKey: "UserID", as: "Student" });
+student_model_1.Student.belongsTo(exports.User, {
     foreignKey: "UserID",
     constraints: false,
     as: "User",
@@ -84,6 +87,27 @@ leaveRequest_model_1.LeaveRequest.belongsTo(student_model_1.Student, {
     foreignKey: "StudentID",
     constraints: false,
     as: "Student",
+});
+exports.User.hasOne(wallet_model_1.Wallet, { foreignKey: "UserID", as: "Wallet" });
+wallet_model_1.Wallet.belongsTo(exports.User, {
+    foreignKey: "UserID",
+    constraints: false,
+    as: "User",
+});
+exports.User.hasOne(transaction_model_1.Transaction, { foreignKey: "UserID", as: "Transaction" });
+transaction_model_1.Transaction.belongsTo(exports.User, {
+    foreignKey: "UserID",
+    constraints: false,
+    as: "User",
+});
+exports.User.hasOne(walletTransaction_model_1.WalletTransaction, {
+    foreignKey: "UserID",
+    as: "WalletTransaction",
+});
+walletTransaction_model_1.WalletTransaction.belongsTo(exports.User, {
+    foreignKey: "UserID",
+    constraints: false,
+    as: "User",
 });
 function init() {
     return __awaiter(this, void 0, void 0, function* () {

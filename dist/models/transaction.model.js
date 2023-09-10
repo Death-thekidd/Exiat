@@ -12,23 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = exports.Student = exports.initStudentModel = exports.StudentType = void 0;
+exports.init = exports.Transaction = exports.initTransactionModel = exports.GatewayType = exports.CurrencyType = void 0;
 const sequelize_1 = require("sequelize");
 const sequelize_2 = __importDefault(require("../sequelize"));
 const user_model_1 = require("./user.model");
-// Define the UserType enum
-var StudentType;
-(function (StudentType) {
-})(StudentType = exports.StudentType || (exports.StudentType = {}));
-const initStudentModel = (sequelize) => {
-    const Student = sequelize.define("Student", {
-        id: {
-            type: sequelize_1.DataTypes.UUID,
-            defaultValue: sequelize_1.DataTypes.UUIDV4,
-            allowNull: false,
-            autoIncrement: false,
-            primaryKey: true,
-        },
+var CurrencyType;
+(function (CurrencyType) {
+    CurrencyType["NGN"] = "NGN";
+})(CurrencyType = exports.CurrencyType || (exports.CurrencyType = {}));
+var GatewayType;
+(function (GatewayType) {
+    GatewayType["PAYSTACK"] = "paystack";
+})(GatewayType = exports.GatewayType || (exports.GatewayType = {}));
+const initTransactionModel = (sequelize) => {
+    const Transaction = sequelize.define("Wallet", {
         UserID: {
             type: sequelize_1.DataTypes.UUID,
             allowNull: false,
@@ -37,22 +34,26 @@ const initStudentModel = (sequelize) => {
                 key: "id",
             },
         },
-        username: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-        password: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-        email: { type: sequelize_1.DataTypes.STRING, allowNull: false, unique: true },
+        transactionID: { type: sequelize_1.DataTypes.NUMBER, allowNull: false },
         name: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-        guardianEmail: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-        guardianPhone: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-        guardianName: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+        email: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+        amount: { type: sequelize_1.DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+        currency: {
+            type: sequelize_1.DataTypes.STRING,
+            allowNull: false,
+            defaultValue: CurrencyType.NGN,
+        },
+        paymentStatus: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+        paymentGateway: { type: sequelize_1.DataTypes.STRING, defaultValue: "paystack" },
     });
-    return Student;
+    return Transaction;
 };
-exports.initStudentModel = initStudentModel;
-exports.Student = exports.initStudentModel(sequelize_2.default);
+exports.initTransactionModel = initTransactionModel;
+exports.Transaction = exports.initTransactionModel(sequelize_2.default);
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield exports.Student.sequelize.sync();
+            yield exports.Transaction.sequelize.sync();
             // console.log("Database and tables synced successfully");
         }
         catch (error) {
@@ -61,4 +62,4 @@ function init() {
     });
 }
 exports.init = init;
-//# sourceMappingURL=student.model.js.map
+//# sourceMappingURL=transaction.model.js.map

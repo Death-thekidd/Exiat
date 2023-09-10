@@ -13,6 +13,12 @@ import async from "async";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import sendMail from "../sendMail";
+import { Wallet, WalletInstance } from "../models/wallet.model";
+import { createWalletTransaction } from "./wallet.controller";
+import {
+	CurrencyType,
+	TransactionType,
+} from "../models/walletTransaction.model";
 
 /**
  * Create leave request
@@ -47,19 +53,28 @@ export const submitLeaveRequest = async (
 				},
 				async function checkBalance(
 					student: StudentInstance,
-					done: (err: Error | null, student: StudentInstance) => void
+					done: (
+						err: Error | null,
+						student: StudentInstance,
+						wallet: WalletInstance
+					) => void
 				) {
-					if (student.balance <= 0) {
-						return done(new Error("Insufficient Balance"), null); // Pass an error to the next function
+					const wallet = await Wallet.findOne({
+						where: { UserID: student.UserID },
+					});
+					if (wallet.balance <= 0) {
+						return done(new Error("Insufficient Balance"), null, null); // Pass an error to the next function
 					}
-					done(null, student);
+					done(null, student, wallet);
 				},
 				async function saveRequest(
 					student: StudentInstance,
+					wallet: WalletInstance,
 					done: (
 						err: Error,
 						request: LeaveRequestInstance,
-						student: StudentInstance
+						student: StudentInstance,
+						wallet: WalletInstance
 					) => void
 				) {
 					try {
@@ -70,20 +85,28 @@ export const submitLeaveRequest = async (
 							returnDate: returnDate,
 							StudentID: id,
 						});
-						done(null, request, student);
+						done(null, request, student, wallet);
 					} catch (error) {
 						console.error("Unable to create Leave request : ", error);
-						return done(error, null, null); // Pass an error to the next function
+						return done(error, null, null, null); // Pass an error to the next function
 					}
 				},
 				async function subtractFee(
 					request: LeaveRequestInstance,
 					student: StudentInstance,
+					wallet: WalletInstance,
 					done: (err: Error, request: LeaveRequestInstance) => void
 				) {
 					try {
-						student.balance -= 1;
-						await student.save();
+						await createWalletTransaction(
+							student.UserID,
+							"completed",
+							CurrencyType.NGN,
+							1000,
+							TransactionType.PAYMENT
+						);
+						wallet.balance -= 1;
+						await wallet.save();
 						done(null, request);
 					} catch (error) {
 						console.error("Unable to subtract fee : ", error);

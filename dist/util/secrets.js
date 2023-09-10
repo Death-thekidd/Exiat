@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PAYSTACK_PUBLIC_KEY = exports.SENDER_PASS = exports.SENDER_EMAIL = exports.MYSQL_DB_PASSWORD = exports.MYSQL_DB_USER = exports.MYSQL_DB_NAME = exports.MYSQL_DB_HOST = exports.SESSION_SECRET = exports.ENVIRONMENT = void 0;
+exports.PAYSTACK_SECRET_KEY = exports.PAYSTACK_PUBLIC_KEY = exports.SENDER_PASS = exports.SENDER_EMAIL = exports.MYSQL_DB_PASSWORD = exports.MYSQL_DB_USER = exports.MYSQL_DB_NAME = exports.MYSQL_DB_HOST = exports.SESSION_SECRET = exports.ENVIRONMENT = void 0;
 const logger_1 = __importDefault(require("./logger"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = __importDefault(require("fs"));
@@ -33,6 +33,7 @@ exports.MYSQL_DB_PASSWORD = prod
 exports.SENDER_EMAIL = process.env["SENDER_EMAIL"];
 exports.SENDER_PASS = process.env["SENDER_PASS"];
 exports.PAYSTACK_PUBLIC_KEY = process.env["PAYSTACK_PUBLIC_KEY"];
+exports.PAYSTACK_SECRET_KEY = process.env["PAYSTACK_SECRET_KEY"];
 if (!exports.SESSION_SECRET) {
     logger_1.default.error("No client secret. Set SESSION_SECRET environment variable.");
     process.exit(1);
