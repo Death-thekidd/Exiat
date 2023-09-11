@@ -28,7 +28,7 @@ export interface WalletTransactionInstance
 
 export const initWalletTransactionModel = (sequelize: Sequelize) => {
 	const WalletTransaction = sequelize.define<WalletTransactionInstance>(
-		"Wallet",
+		"WalletTransaction",
 		{
 			id: {
 				type: DataTypes.UUID,

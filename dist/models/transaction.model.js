@@ -25,7 +25,7 @@ var GatewayType;
     GatewayType["PAYSTACK"] = "paystack";
 })(GatewayType = exports.GatewayType || (exports.GatewayType = {}));
 const initTransactionModel = (sequelize) => {
-    const Transaction = sequelize.define("Wallet", {
+    const Transaction = sequelize.define("Transaction", {
         UserID: {
             type: sequelize_1.DataTypes.UUID,
             allowNull: false,
