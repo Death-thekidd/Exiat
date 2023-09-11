@@ -10,8 +10,10 @@ import SequelizeStore from "connect-session-sequelize";
 // Controllers (route handlers)
 import * as userController from "./controllers/user.controller";
 import * as leaveRequestController from "./controllers/leaveRequest.controller";
-import * as currencyController from "./controllers/currency.controller";
+import * as payStackController from "./controllers/payStack.controller";
 import * as walletController from "./controllers/wallet.controller";
+import * as walletTransactionController from "./controllers/walletTransaction.controller";
+import * as transactionController from "./controllers/transaction.controller";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -82,6 +84,8 @@ const logger = winston.createLogger({
 app.get("/", (req: Request, res: Response) => {
 	res.json({ message: "Welcome to Exiat application." });
 });
+app.get("/users", userController.getUsers);
+app.get("/user/:id", userController.getUser);
 app.post("/login", userController.postLogin);
 app.post("/forgot", userController.postForgot);
 app.post("/signup", userController.postSignup);
@@ -101,14 +105,31 @@ app.post(
 	userController.postDeleteAccount
 );
 
+app.post("/leave-requests", leaveRequestController.getLeaveRequests);
+app.post("/leave-request/:id", leaveRequestController.getLeaveRequest);
 app.post("/submit-request", leaveRequestController.submitLeaveRequest);
 app.post("/approve-leave-request", leaveRequestController.approveLeaveRequest);
 app.post("/reject-leave-request", leaveRequestController.rejectLeaveRequest);
 app.post("/check-in", leaveRequestController.checkInStudent);
 app.post("/check-out", leaveRequestController.checkOutStudent);
 
-app.post("/initialize-payment", currencyController.initializePayment);
+app.post("/initialize-payment", payStackController.initializePayment);
+
 app.post("/verify-transaction", walletController.verifyPayment);
+app.post("/wallets", walletController.getWallets);
+app.post("/wallet/:id", walletController.getWallet);
+
+app.post(
+	"/wallet-transactions",
+	walletTransactionController.getWalletTransactions
+);
+app.post(
+	"/wallet-transaction/:id",
+	walletTransactionController.getWalletTransaction
+);
+
+app.post("/transactions", transactionController.getTransactions);
+app.post("/transaction/:id", transactionController.getTransaction);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 	if (!res.headersSent) {

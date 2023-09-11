@@ -21,6 +21,55 @@ import { Student } from "../models/student.model";
 import sendMail from "../sendMail";
 
 /**
+ * Get all users
+ * @route GET /users
+ */
+export const getUsers = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const users = await User.findAll();
+		return res.status(200).json(users);
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
+ * Get User by ID
+ * @route GET /user/:id
+ */
+export const getUser = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const userId = req.params.id;
+		const user = await User.findByPk(userId);
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		if (user.userType === "Student") {
+			const student = await Student.findOne({
+				where: { UserID: user.id },
+			});
+			return res.status(200).json({ data: student });
+		}
+		const staff = await Staff.findOne({
+			where: { UserID: user.id },
+		});
+		return res.status(200).json({ data: staff });
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
  * Sign in using email and password.
  * @route POST /login
  */

@@ -1,8 +1,5 @@
 import errorHandler from "errorhandler";
 import app from "./app";
-import https from "https";
-import http from "http";
-import fs from "fs";
 
 /**
  * Error Handler. Provides full stack

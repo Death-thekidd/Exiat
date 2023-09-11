@@ -2,23 +2,56 @@ import {
 	LeaveRequest,
 	LeaveRequestInstance,
 } from "../models/leaveRequest.model";
-import { Staff } from "../models/staff.model";
 import { Student, StudentInstance } from "../models/student.model";
-import { Op } from "sequelize";
-import { body, check, validationResult } from "express-validator";
+import { check, validationResult } from "express-validator";
 import { Request, Response, NextFunction } from "express";
-import { IVerifyOptions } from "passport-local";
-import passport from "passport";
 import async from "async";
-import crypto from "crypto";
-import nodemailer from "nodemailer";
-import sendMail from "../sendMail";
 import { Wallet, WalletInstance } from "../models/wallet.model";
 import { createWalletTransaction } from "./wallet.controller";
 import {
 	CurrencyType,
 	TransactionType,
 } from "../models/walletTransaction.model";
+
+/**
+ * Get all leave requests
+ * @route GET /leave-requets
+ */
+export const getLeaveRequests = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const leaveRequests = await LeaveRequest.findAll();
+		return res.status(200).json({ data: leaveRequests });
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
+ * Get leave request by ID
+ * @route GET /leave-request/:id
+ */
+export const getLeaveRequest = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const leaveRequestId = req.params.id;
+		const leaveRequest = await LeaveRequest.findByPk(leaveRequestId);
+
+		if (!leaveRequest) {
+			return res.status(404).json({ message: "Leave Request not found" });
+		}
+
+		return res.status(200).json({ data: leaveRequest });
+	} catch (error) {
+		next(error);
+	}
+};
 
 /**
  * Create leave request

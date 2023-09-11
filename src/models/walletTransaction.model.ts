@@ -12,6 +12,7 @@ export enum TransactionType {
 }
 
 export interface WalletTransactionDocument {
+    id: string;
 	amount: number;
 	UserID: string;
 	isInFlow: boolean;
@@ -29,6 +30,13 @@ export const initWalletTransactionModel = (sequelize: Sequelize) => {
 	const WalletTransaction = sequelize.define<WalletTransactionInstance>(
 		"Wallet",
 		{
+			id: {
+				type: DataTypes.UUID,
+				defaultValue: DataTypes.UUIDV4,
+				allowNull: false,
+				autoIncrement: false,
+				primaryKey: true,
+			},
 			amount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 			UserID: {
 				type: DataTypes.UUID,

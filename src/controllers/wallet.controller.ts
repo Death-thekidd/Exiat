@@ -11,6 +11,46 @@ import crypto from "crypto";
 import { User } from "../models/user.model";
 
 /**
+ * Get all Wallets
+ * @route GET /wallets
+ */
+export const getWallets = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const wallets = await Wallet.findAll();
+		return res.status(200).json({ data: wallets });
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
+ * Get Wallet by UserID
+ * @route GET /wallet/:id
+ */
+export const getWallet = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<Response<any, Record<string, any>>> => {
+	try {
+		const userID = req.params.id;
+		const wallet = await Wallet.findOne({ where: { UserID: userID } });
+
+		if (!wallet) {
+			return res.status(404).json({ message: "Wallet not found" });
+		}
+
+		return res.status(200).json({ data: wallet });
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
  * Paystack webhook url
  * @route POST /verify-transaction
  */

@@ -35,7 +35,11 @@ export const initTransactionModel = (sequelize: Sequelize) => {
 				key: "id",
 			},
 		},
-		transactionID: { type: DataTypes.NUMBER, allowNull: false },
+		transactionID: {
+			type: DataTypes.NUMBER,
+			allowNull: false,
+			primaryKey: true,
+		},
 		name: { type: DataTypes.STRING, allowNull: false },
 		email: { type: DataTypes.STRING, allowNull: false },
 		amount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
