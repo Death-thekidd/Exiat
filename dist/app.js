@@ -32,8 +32,10 @@ const connect_session_sequelize_1 = __importDefault(require("connect-session-seq
 // Controllers (route handlers)
 const userController = __importStar(require("./controllers/user.controller"));
 const leaveRequestController = __importStar(require("./controllers/leaveRequest.controller"));
-const currencyController = __importStar(require("./controllers/currency.controller"));
+const payStackController = __importStar(require("./controllers/payStack.controller"));
 const walletController = __importStar(require("./controllers/wallet.controller"));
+const walletTransactionController = __importStar(require("./controllers/walletTransaction.controller"));
+const transactionController = __importStar(require("./controllers/transaction.controller"));
 // API keys and Passport configuration
 const passportConfig = __importStar(require("./config/passport"));
 const sequelize_1 = __importDefault(require("./sequelize"));
@@ -92,19 +94,29 @@ const logger = winston_1.default.createLogger({
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to Exiat application." });
 });
+app.get("/users", userController.getUsers);
+app.get("/user/:id", userController.getUser);
 app.post("/login", userController.postLogin);
 app.post("/forgot", userController.postForgot);
 app.post("/signup", userController.postSignup);
 app.post("/account/profile", passportConfig.isAuthenticated, userController.postUpdateProfile);
 app.post("/account/password", passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post("/account/delete", passportConfig.isAuthenticated, userController.postDeleteAccount);
+app.post("/leave-requests", leaveRequestController.getLeaveRequests);
+app.post("/leave-request/:id", leaveRequestController.getLeaveRequest);
 app.post("/submit-request", leaveRequestController.submitLeaveRequest);
 app.post("/approve-leave-request", leaveRequestController.approveLeaveRequest);
 app.post("/reject-leave-request", leaveRequestController.rejectLeaveRequest);
 app.post("/check-in", leaveRequestController.checkInStudent);
 app.post("/check-out", leaveRequestController.checkOutStudent);
-app.post("/initialize-payment", currencyController.initializePayment);
+app.post("/initialize-payment", payStackController.initializePayment);
 app.post("/verify-transaction", walletController.verifyPayment);
+app.post("/wallets", walletController.getWallets);
+app.post("/wallet/:id", walletController.getWallet);
+app.post("/wallet-transactions", walletTransactionController.getWalletTransactions);
+app.post("/wallet-transaction/:id", walletTransactionController.getWalletTransaction);
+app.post("/transactions", transactionController.getTransactions);
+app.post("/transaction/:id", transactionController.getTransaction);
 app.use((err, req, res, next) => {
     if (!res.headersSent) {
         logger.error(err.message);

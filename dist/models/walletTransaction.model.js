@@ -27,6 +27,13 @@ var TransactionType;
 })(TransactionType = exports.TransactionType || (exports.TransactionType = {}));
 const initWalletTransactionModel = (sequelize) => {
     const WalletTransaction = sequelize.define("Wallet", {
+        id: {
+            type: sequelize_1.DataTypes.UUID,
+            defaultValue: sequelize_1.DataTypes.UUIDV4,
+            allowNull: false,
+            autoIncrement: false,
+            primaryKey: true,
+        },
         amount: { type: sequelize_1.DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         UserID: {
             type: sequelize_1.DataTypes.UUID,

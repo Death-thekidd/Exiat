@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postForgot = exports.postReset = exports.postDeleteAccount = exports.postUpdatePassword = exports.postUpdateProfile = exports.postSignup = exports.logout = exports.postLogin = void 0;
+exports.postForgot = exports.postReset = exports.postDeleteAccount = exports.postUpdatePassword = exports.postUpdateProfile = exports.postSignup = exports.logout = exports.postLogin = exports.getUser = exports.getUsers = void 0;
 const async_1 = __importDefault(require("async"));
 const crypto_1 = __importDefault(require("crypto"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
@@ -24,6 +24,47 @@ const sequelize_1 = require("sequelize");
 const staff_model_1 = require("../models/staff.model");
 const student_model_1 = require("../models/student.model");
 const sendMail_1 = __importDefault(require("../sendMail"));
+/**
+ * Get all users
+ * @route GET /users
+ */
+const getUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield user_model_1.User.findAll();
+        return res.status(200).json(users);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getUsers = getUsers;
+/**
+ * Get User by ID
+ * @route GET /user/:id
+ */
+const getUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const user = yield user_model_1.User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (user.userType === "Student") {
+            const student = yield student_model_1.Student.findOne({
+                where: { UserID: user.id },
+            });
+            return res.status(200).json({ data: student });
+        }
+        const staff = yield staff_model_1.Staff.findOne({
+            where: { UserID: user.id },
+        });
+        return res.status(200).json({ data: staff });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getUser = getUser;
 /**
  * Sign in using email and password.
  * @route POST /login

@@ -12,13 +12,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateWallet = exports.createWalletTransaction = exports.verifyPayment = void 0;
+exports.updateWallet = exports.createWalletTransaction = exports.verifyPayment = exports.getWallet = exports.getWallets = void 0;
 const wallet_model_1 = require("../models/wallet.model");
 const walletTransaction_model_1 = require("../models/walletTransaction.model");
 const transaction_model_1 = require("../models/transaction.model");
 const secrets_1 = require("../util/secrets");
 const crypto_1 = __importDefault(require("crypto"));
 const user_model_1 = require("../models/user.model");
+/**
+ * Get all Wallets
+ * @route GET /wallets
+ */
+const getWallets = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const wallets = yield wallet_model_1.Wallet.findAll();
+        return res.status(200).json({ data: wallets });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getWallets = getWallets;
+/**
+ * Get Wallet by UserID
+ * @route GET /wallet/:id
+ */
+const getWallet = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userID = req.params.id;
+        const wallet = yield wallet_model_1.Wallet.findOne({ where: { UserID: userID } });
+        if (!wallet) {
+            return res.status(404).json({ message: "Wallet not found" });
+        }
+        return res.status(200).json({ data: wallet });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getWallet = getWallet;
 /**
  * Paystack webhook url
  * @route POST /verify-transaction

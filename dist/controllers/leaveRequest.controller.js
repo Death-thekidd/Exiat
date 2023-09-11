@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkOutStudent = exports.checkInStudent = exports.rejectLeaveRequest = exports.approveLeaveRequest = exports.submitLeaveRequest = void 0;
+exports.checkOutStudent = exports.checkInStudent = exports.rejectLeaveRequest = exports.approveLeaveRequest = exports.submitLeaveRequest = exports.getLeaveRequest = exports.getLeaveRequests = void 0;
 const leaveRequest_model_1 = require("../models/leaveRequest.model");
 const student_model_1 = require("../models/student.model");
 const express_validator_1 = require("express-validator");
@@ -20,6 +20,38 @@ const async_1 = __importDefault(require("async"));
 const wallet_model_1 = require("../models/wallet.model");
 const wallet_controller_1 = require("./wallet.controller");
 const walletTransaction_model_1 = require("../models/walletTransaction.model");
+/**
+ * Get all leave requests
+ * @route GET /leave-requets
+ */
+const getLeaveRequests = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const leaveRequests = yield leaveRequest_model_1.LeaveRequest.findAll();
+        return res.status(200).json({ data: leaveRequests });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getLeaveRequests = getLeaveRequests;
+/**
+ * Get leave request by ID
+ * @route GET /leave-request/:id
+ */
+const getLeaveRequest = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const leaveRequestId = req.params.id;
+        const leaveRequest = yield leaveRequest_model_1.LeaveRequest.findByPk(leaveRequestId);
+        if (!leaveRequest) {
+            return res.status(404).json({ message: "Leave Request not found" });
+        }
+        return res.status(200).json({ data: leaveRequest });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getLeaveRequest = getLeaveRequest;
 /**
  * Create leave request
  * @route POST /submit-request
