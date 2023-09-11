@@ -36,7 +36,7 @@ export const initTransactionModel = (sequelize: Sequelize) => {
 			},
 		},
 		transactionID: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.INTEGER,
 			allowNull: false,
 			primaryKey: true,
 		},
